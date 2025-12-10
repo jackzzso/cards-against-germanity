@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cardsagainstgermanity</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:," />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">cards<span>against</span>germanity</div>
+    <div class="status-chip" id="statusChip">Loading cards…</div>
+    <button id="btnLang" class="ghost">Deutsch</button>
+  </header>
+
+  <main>
+    <section class="hero" id="screenIntro">
+      <div class="hero-text">
+        <p class="eyebrow" id="txtEyebrow">Party setup</p>
+        <h1 id="txtHeroTitle">Start a lobby<br/>share the seed<br/>play together IRL.</h1>
+        <p class="sub" id="txtHeroSub">Black cards sync via seed, white cards are random per device. Local only, no servers.</p>
+        <div class="controls">
+          <input id="seedInput" type="text" placeholder="Enter or create lobby seed" />
+          <div class="btn-row">
+            <button id="btnCreate">Create lobby</button>
+            <button id="btnJoin" class="ghost">Join lobby</button>
+          </div>
+          <div class="fine-print" id="txtFinePrint">Tip: use the same seed on all devices.</div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="card-preview">
+          <div class="preview-black" id="txtPreviewBlack">“Question cards” sync by seed.</div>
+          <div class="preview-white" id="txtPreviewWhite">Answer cards are random per device.</div>
+        </div>
+        <div class="hero-actions">
+          <button id="btnGoToTable" disabled>Go to table</button>
+          <button id="btnCopy" class="ghost">Copy seed</button>
+        </div>
+        <div class="mini-note" id="currentSeedLabel">Seed: —</div>
+      </div>
+    </section>
+
+    <section class="table hidden" id="screenTable">
+      <div class="table-header">
+        <div>
+          <div class="label" id="txtLobbySeed">Lobby seed</div>
+          <div class="seed-display" id="seedDisplay">—</div>
+        </div>
+        <div class="table-actions">
+          <button id="btnCopyTop" class="ghost">Copy seed</button>
+          <button id="btnStartRound">Start round</button>
+          <button id="btnExit" class="ghost">Exit game</button>
+        </div>
+      </div>
+
+      <div class="cards-row">
+        <div class="card big-card" id="blackCard">
+          <div class="label" id="txtBlackLabel">BLACK CARD (Question)</div>
+          <div class="text" id="blackText">Tap “Start round”.</div>
+          <div class="hint" id="txtBlackHint">Tap/click for next round</div>
+        </div>
+        <div class="hand">
+          <div class="label" id="txtHandLabel">YOUR WHITE CARDS (Answers)</div>
+          <div class="play-area">
+            <div class="play-label" id="txtPlayLabel">Selected card</div>
+            <div class="play-slot" id="selectedCardSlot">
+              <div class="placeholder" id="txtPlaceholder">Click a white card</div>
+            </div>
+            <button id="btnShowcase" class="ghost slim-btn">Show to players</button>
+          </div>
+          <div class="hand-grid" id="whiteHand"></div>
+        </div>
+      </div>
+
+      <div class="howto">
+        <h2 id="txtFlowHeading">Flow</h2>
+        <ol>
+          <li id="step1"><strong>Share the seed.</strong> Everyone enters the same seed.</li>
+          <li id="step2"><strong>Start round.</strong> New black card + hand are dealt.</li>
+          <li id="step3"><strong>Pick a white card.</strong> One click; no redraws.</li>
+          <li id="step4"><strong>Next round.</strong> Click the black card.</li>
+        </ol>
+        <p class="note" id="txtNote">All local in your browser. No server, no tracking.</p>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Showcase overlay -->
+  <div class="showcase hidden" id="showcase">
+    <div class="showcase-card black-show" id="showBlack"></div>
+    <div class="showcase-card white-show" id="showWhite"></div>
+    <button class="ghost close-show" id="btnCloseShow">Close</button>
+  </div>
+
+  <footer>
+    <span id="txtFooter">Unofficial, inspired by Cards Against Humanity.</span>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
