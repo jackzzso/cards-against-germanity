@@ -41,7 +41,13 @@ const STRINGS = {
     alertNeedSeed: "Please enter a seed.",
     alertNeedSeedFirst: "Please create or enter a seed.",
     alertCardsNotReady: "Cards not loaded yet.",
-    alertSelect: "Pick a white card first."
+    alertSelect: "Pick a white card first.",
+    roundLabel: "Round",
+    endEyebrow: "Nice run!",
+    endTitle: "You played all black cards.",
+    endSub: "Time for a new seed or replay this one from the start.",
+    endReplay: "Replay seed",
+    endExit: "Back to lobby"
   },
   de: {
     statusLoading: "Lade Karten…",
@@ -84,7 +90,13 @@ const STRINGS = {
     alertNeedSeed: "Bitte einen Seed eingeben.",
     alertNeedSeedFirst: "Bitte zuerst einen Seed erstellen oder eingeben.",
     alertCardsNotReady: "Karten sind noch nicht geladen.",
-    alertSelect: "Bitte zuerst eine weiße Karte wählen."
+    alertSelect: "Bitte zuerst eine weiße Karte wählen.",
+    roundLabel: "Runde",
+    endEyebrow: "Starke Runde!",
+    endTitle: "Alle schwarzen Karten gespielt.",
+    endSub: "Zeit für einen neuen Seed oder von vorn starten.",
+    endReplay: "Seed erneut spielen",
+    endExit: "Zurück zur Lobby"
   }
 };
 
@@ -154,13 +166,15 @@ const btnStartRound = document.getElementById("btnStartRound");
 const btnExit = document.getElementById("btnExit");
 const btnLang = document.getElementById("btnLang");
 const btnShowcase = document.getElementById("btnShowcase");
-const btnCloseShow = document.getElementById("btnCloseShow");
+const btnNextRound = document.getElementById("btnNextRound");
+const btnCancelShow = document.getElementById("btnCancelShow");
+const btnViewSource = document.getElementById("btnViewSource");
 const blackCardEl = document.getElementById("blackCard");
 const blackTextEl = document.getElementById("blackText");
 const whiteHandEl = document.getElementById("whiteHand");
 const selectedCardSlot = document.getElementById("selectedCardSlot");
 const seedDisplay = document.getElementById("seedDisplay");
-const statusChip = document.getElementById("statusChip");
+const roundDisplay = document.getElementById("roundDisplay");
 const toastEl = document.getElementById("toast");
 const screenIntro = document.getElementById("screenIntro");
 const screenTable = document.getElementById("screenTable");
@@ -168,6 +182,14 @@ const currentSeedLabel = document.getElementById("currentSeedLabel");
 const showcase = document.getElementById("showcase");
 const showBlack = document.getElementById("showBlack");
 const showWhite = document.getElementById("showWhite");
+const showBlackText = document.getElementById("showBlackText");
+const showWhiteText = document.getElementById("showWhiteText");
+const endOverlay = document.getElementById("endOverlay");
+const btnEndReplay = document.getElementById("btnEndReplay");
+const btnEndExit = document.getElementById("btnEndExit");
+const txtEndEyebrow = document.getElementById("txtEndEyebrow");
+const txtEndTitle = document.getElementById("txtEndTitle");
+const txtEndSub = document.getElementById("txtEndSub");
 
 // Text nodes
 const txtEyebrow = document.getElementById("txtEyebrow");
@@ -183,6 +205,7 @@ const txtHandLabel = document.getElementById("txtHandLabel");
 const txtPlayLabel = document.getElementById("txtPlayLabel");
 const txtPlaceholder = document.getElementById("txtPlaceholder");
 const txtFlowHeading = document.getElementById("txtFlowHeading");
+const txtRoundLabel = document.getElementById("txtRoundLabel");
 const step1 = document.getElementById("step1");
 const step2 = document.getElementById("step2");
 const step3 = document.getElementById("step3");
@@ -200,14 +223,22 @@ let selectedWhite = "";
 let cardsReady = false;
 let tableEntered = false;
 let gameStarted = false;
+let blackOrder = [];
+let gameEnded = false;
+let autoAdvancePending = false;
 
 // --- Fallback card data (German) ---
 const FALLBACK = { blackCards: [], whiteCards: [] };
 FALLBACK.blackCards = [
-  "six seven tuff"
+  "six seven tuff",
+  "unemployed for life",
+  "the great lock in the great lock in the great lock in the great lock in the great lock in the great lock in the great lock in"
 ];
 FALLBACK.whiteCards = [
-  "six seven tuff"
+  "six seven tuff",
+  "unemployed for life",
+  "the great lock in the great lock in the great lock in the great lock in the great lock in the great lock in the great lock in",
+  "unc pushing 40"
 ];
 
 // --- Load cards from JSON ---
@@ -219,14 +250,14 @@ async function loadCards() {
     blackCards = Array.isArray(data.blackCards) && data.blackCards.length ? data.blackCards : FALLBACK.blackCards;
     whiteCards = Array.isArray(data.whiteCards) && data.whiteCards.length ? data.whiteCards : FALLBACK.whiteCards;
     cardsReady = true;
-    statusChip.textContent = t("statusLoaded");
+    showToast(t("statusLoaded"));
   } catch (e) {
     console.warn("cards.json could not be loaded, using fallback.", e);
     blackCards = FALLBACK.blackCards;
     whiteCards = FALLBACK.whiteCards;
     cardsReady = true;
     fallbackLoaded = true;
-    statusChip.textContent = t("statusFallback");
+    showToast(t("statusFallback"));
   }
 }
 
@@ -241,9 +272,6 @@ function getRandFromSeed(seed, offset = 0) {
 
 // --- UI helpers ---
 function applyLocaleTexts() {
-  statusChip.textContent = cardsReady
-    ? (fallbackLoaded ? t("statusFallback") : t("statusLoaded"))
-    : t("statusLoading");
   txtEyebrow.textContent = t("eyebrow");
   txtHeroTitle.innerHTML = t("heroTitle").replace(/\n/g, "<br/>");
   txtHeroSub.textContent = t("heroSub");
@@ -259,7 +287,6 @@ function applyLocaleTexts() {
   btnStartRound.textContent = t("startRound");
   btnExit.textContent = t("exitGame");
   btnShowcase.textContent = lang === "en" ? "Show to players" : "Allen zeigen";
-  btnCloseShow.textContent = lang === "en" ? "Close" : "Schließen";
   txtLobbySeed.textContent = t("lobbySeed");
   txtBlackLabel.textContent = t("blackLabel");
   blackTextEl.textContent = currentSeed ? blackTextEl.textContent : t("blackTap");
@@ -268,6 +295,7 @@ function applyLocaleTexts() {
   txtPlayLabel.textContent = t("playLabel");
   txtPlaceholder.textContent = t("placeholder");
   txtFlowHeading.textContent = t("flowHeading");
+  txtRoundLabel.textContent = t("roundLabel");
   step1.innerHTML = `<strong>${t("step1").split(". ")[0]}.</strong> ${t("step1").split(". ").slice(1).join(". ")}`;
   step2.innerHTML = `<strong>${t("step2").split(". ")[0]}.</strong> ${t("step2").split(". ").slice(1).join(". ")}`;
   step3.innerHTML = `<strong>${t("step3").split(". ")[0]}.</strong> ${t("step3").split(". ").slice(1).join(". ")}`;
@@ -277,12 +305,19 @@ function applyLocaleTexts() {
   btnLang.textContent = lang === "en" ? "Deutsch" : "English";
   document.documentElement.lang = lang;
   currentSeedLabel.textContent = currentSeed ? `Seed: ${currentSeed}` : (lang === "en" ? "Seed: —" : "Seed: —");
+  txtEndEyebrow.textContent = t("endEyebrow");
+  txtEndTitle.textContent = t("endTitle");
+  txtEndSub.textContent = t("endSub");
+  btnEndReplay.textContent = t("endReplay");
+  btnEndExit.textContent = t("endExit");
 }
 
-function showToast(msg) {
+function showToast(msg, type = "info") {
   toastEl.textContent = msg;
+  toastEl.classList.remove("warn");
+  if (type === "warn") toastEl.classList.add("warn");
   toastEl.classList.add("show");
-  setTimeout(() => toastEl.classList.remove("show"), 1500);
+  setTimeout(() => toastEl.classList.remove("show"), 1800);
 }
 
 function updateSelectedSlot() {
@@ -292,12 +327,14 @@ function updateSelectedSlot() {
     ph.className = "placeholder";
     ph.textContent = t("placeholder");
     selectedCardSlot.appendChild(ph);
+    selectedCardSlot.onclick = null;
     return;
   }
   const card = document.createElement("div");
   card.className = "selected-visual";
   card.textContent = selectedWhite;
   selectedCardSlot.appendChild(card);
+  selectedCardSlot.onclick = () => clearSelection();
 }
 
 function clearSelection() {
@@ -306,21 +343,36 @@ function clearSelection() {
   whiteHandEl.querySelectorAll(".white-card.selected").forEach(n => n.classList.remove("selected"));
 }
 
+function updateRoundDisplay() {
+  const hasDeck = blackOrder.length > 0;
+  const inPlay = gameStarted || currentBlackIndex > 0;
+  const val = hasDeck && inPlay ? currentBlackIndex + 1 : "—";
+  roundDisplay.textContent = val;
+}
+
 // Showcase helpers
-function openShowcase() {
+function openShowcase(autoAdvance = false) {
   if (!selectedWhite) {
-    alert(t("alertSelect"));
+    showToast(t("alertSelect"), "warn");
+    autoAdvancePending = false;
     return;
   }
-  showBlack.textContent = blackTextEl.textContent || "";
-  showWhite.textContent = selectedWhite;
+  if (showBlackText) showBlackText.textContent = blackTextEl.textContent || "";
+  if (showWhiteText) showWhiteText.textContent = selectedWhite || "";
+  autoAdvancePending = autoAdvance;
   showcase.classList.remove("hidden");
   showcase.classList.add("visible");
   showToast(t("toastShow"));
 }
-function closeShowcase() {
+function closeShowcase({ advance = false } = {}) {
   showcase.classList.add("hidden");
   showcase.classList.remove("visible");
+  if (advance && autoAdvancePending) {
+    autoAdvancePending = false;
+    nextRound();
+  } else {
+    autoAdvancePending = false;
+  }
 }
 
 // --- Render ---
@@ -329,10 +381,16 @@ function renderBlackCard() {
     blackTextEl.textContent = t("blackTap");
     return;
   }
-  const rand = getRandFromSeed(currentSeed);
-  const order = seededShuffle(blackCards, rand);
-  const card = order[currentBlackIndex % order.length];
-  blackTextEl.textContent = card;
+  if (!blackOrder.length) buildBlackOrder();
+  if (!blackOrder.length) {
+    blackTextEl.textContent = t("blackTap");
+    return;
+  }
+  if (currentBlackIndex >= blackOrder.length) {
+    endGame();
+    return;
+  }
+  blackTextEl.textContent = blackOrder[currentBlackIndex];
 }
 
 function renderWhiteHand() {
@@ -346,13 +404,28 @@ function renderWhiteHand() {
     div.className = "white-card";
     div.textContent = text;
     div.onclick = () => selectWhiteCard(div, text);
+    const brand = document.createElement("div");
+    brand.className = "card-brand";
+    const icon = document.createElement("span");
+    icon.className = "brand-icon";
+    const name = document.createElement("span");
+    name.className = "brand-name";
+    name.textContent = "Cards Against Germanity";
+    brand.appendChild(icon);
+    brand.appendChild(name);
+    div.appendChild(brand);
     whiteHandEl.appendChild(div);
   });
 }
 
 // --- Selection logic ---
 function selectWhiteCard(el, text) {
+  const alreadySelected = el.classList.contains("selected") && selectedWhite === text;
   whiteHandEl.querySelectorAll(".white-card.selected").forEach(n => n.classList.remove("selected"));
+  if (alreadySelected) {
+    clearSelection();
+    return;
+  }
   el.classList.add("selected");
   selectedWhite = text;
   updateSelectedSlot();
@@ -361,7 +434,7 @@ function selectWhiteCard(el, text) {
 // --- Flow control ---
 function enterTable() {
   if (!currentSeed) {
-    alert(t("alertNeedSeedFirst"));
+    showToast(t("alertNeedSeedFirst"), "warn");
     return;
   }
   tableEntered = true;
@@ -383,11 +456,18 @@ function showStartButton() {
 
 function startRound() {
   if (!cardsReady) {
-    alert(t("alertCardsNotReady"));
+    showToast(t("alertCardsNotReady"), "warn");
     return;
   }
   if (!currentSeed) {
-    alert(t("alertNeedSeed"));
+    showToast(t("alertNeedSeed"), "warn");
+    return;
+  }
+  gameEnded = false;
+  hideEndOverlay();
+  if (!blackOrder.length) buildBlackOrder();
+  if (!blackOrder.length) {
+    showToast(t("alertCardsNotReady"), "warn");
     return;
   }
   enterTable();          // close setup if still open
@@ -396,13 +476,24 @@ function startRound() {
   renderBlackCard();
   renderWhiteHand();     // dealt once per round
   showToast(t("toastRound", currentBlackIndex + 1));
+  btnShowcase.disabled = false;
+  updateRoundDisplay();
 }
 
 function nextRound() {
+  if (gameEnded) {
+    showEndOverlay();
+    return;
+  }
   currentBlackIndex += 1;
+  if (currentBlackIndex >= blackOrder.length) {
+    endGame();
+    return;
+  }
   renderBlackCard();
   renderWhiteHand();
   showToast(t("toastRound", currentBlackIndex + 1));
+  updateRoundDisplay();
 }
 
 function exitGame() {
@@ -410,6 +501,9 @@ function exitGame() {
   gameStarted = false;
   currentBlackIndex = 0;
   selectedWhite = "";
+  blackOrder = [];
+  gameEnded = false;
+  btnShowcase.disabled = true;
   screenTable.classList.add("hidden");
   screenTable.style.display = "none";
   screenIntro.classList.remove("hidden");
@@ -419,13 +513,59 @@ function exitGame() {
   blackTextEl.textContent = t("blackTap");
   whiteHandEl.innerHTML = "";
   updateSelectedSlot();
+  updateRoundDisplay();
   currentSeed = "";
   seedInput.value = "";
   btnGoToTable.disabled = true;
   btnStartRound.disabled = true;
   showStartButton();     // restore start button for next session
   closeShowcase();
+  hideEndOverlay();
   showToast(t("toastExit"));
+}
+
+function buildBlackOrder() {
+  if (!currentSeed || !blackCards.length) {
+    blackOrder = [];
+    return;
+  }
+  const rand = getRandFromSeed(currentSeed);
+  blackOrder = seededShuffle(blackCards, rand);
+  currentBlackIndex = 0;
+}
+
+function endGame() {
+  gameEnded = true;
+  gameStarted = false;
+  autoAdvancePending = false;
+  btnShowcase.disabled = true;
+  hideStartButton();
+  showEndOverlay();
+  blackTextEl.textContent = lang === "en" ? "No black cards left." : "Keine schwarzen Karten mehr.";
+  updateRoundDisplay();
+}
+
+function showEndOverlay() {
+  endOverlay.classList.remove("hidden");
+  endOverlay.classList.add("visible");
+}
+
+function hideEndOverlay() {
+  endOverlay.classList.add("hidden");
+  endOverlay.classList.remove("visible");
+}
+
+function replaySeed() {
+  if (!currentSeed) return;
+  buildBlackOrder();
+  selectedWhite = "";
+  updateSelectedSlot();
+  gameEnded = false;
+  gameStarted = false;
+  btnShowcase.disabled = false;
+  hideEndOverlay();
+  startRound();
+  updateRoundDisplay();
 }
 
 // --- Events ---
@@ -433,37 +573,43 @@ btnCreate.onclick = () => {
   currentSeed = genSeed();
   seedInput.value = currentSeed;
   currentBlackIndex = 0;
+  buildBlackOrder();
   btnGoToTable.disabled = false;
   btnStartRound.disabled = false;
+  btnShowcase.disabled = false;
   showStartButton();
   seedDisplay.textContent = currentSeed;
   currentSeedLabel.textContent = `Seed: ${currentSeed}`;
+  updateRoundDisplay();
   showToast(t("toastCreated"));
 };
 
 btnJoin.onclick = () => {
   const seed = seedInput.value.trim().toUpperCase();
   if (!seed) {
-    alert(t("alertNeedSeed"));
+    showToast(t("alertNeedSeed"), "warn");
     return;
   }
   currentSeed = seed;
   currentBlackIndex = 0;
+  buildBlackOrder();
   btnGoToTable.disabled = false;
   btnStartRound.disabled = false;
+  btnShowcase.disabled = false;
   showStartButton();
   seedDisplay.textContent = currentSeed;
   currentSeedLabel.textContent = `Seed: ${currentSeed}`;
+  updateRoundDisplay();
   showToast(t("toastSet"));
 };
 
 btnCopy.onclick = async () => {
-  if (!seedInput.value) return alert(t("alertNeedSeed"));
+  if (!seedInput.value) return showToast(t("alertNeedSeed"), "warn");
   try {
     await navigator.clipboard.writeText(seedInput.value.trim());
     showToast(t("toastCopied"));
   } catch (e) {
-    alert("Copy failed; please copy manually.");
+    showToast("Copy failed; please copy manually.", "warn");
   }
 };
 
@@ -474,11 +620,18 @@ btnGoToTable.onclick = () => enterTable();
 btnStartRound.onclick = () => startRound();
 
 blackCardEl.onclick = () => {
-  if (!currentSeed) return;
+  if (gameEnded) {
+    showEndOverlay();
+    return;
+  }
+  if (!currentSeed) {
+    showToast(t("alertNeedSeed"), "warn");
+    return;
+  }
   if (!gameStarted) {
     startRound();
   } else {
-    nextRound();
+    openShowcase(true); // require selected card before advancing
   }
 };
 
@@ -489,16 +642,22 @@ btnLang.onclick = () => {
   applyLocaleTexts();
 };
 
-btnShowcase.onclick = () => openShowcase();
-btnCloseShow.onclick = () => closeShowcase();
+btnShowcase.onclick = () => openShowcase(true);
+btnNextRound.onclick = () => closeShowcase({ advance: true });
+btnCancelShow.onclick = () => closeShowcase({ advance: false });
+btnEndReplay.onclick = () => replaySeed();
+btnEndExit.onclick = () => exitGame();
+btnViewSource.onclick = () => window.open("https://github.com/jackzzso/cards-against-germanity", "_blank", "noopener,noreferrer");
 
 // --- Init ---
-statusChip.textContent = t("statusLoading");
 applyLocaleTexts();
 loadCards().then(() => {
   btnGoToTable.disabled = !currentSeed;
   btnStartRound.disabled = !currentSeed;
+  if (currentSeed) buildBlackOrder();
   applyLocaleTexts();
 });
 renderBlackCard();
 updateSelectedSlot();
+btnShowcase.disabled = true;
+updateRoundDisplay();

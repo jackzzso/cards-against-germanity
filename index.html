@@ -10,8 +10,10 @@
 <body>
   <header class="topbar">
     <div class="brand">cards<span>against</span>germanity</div>
-    <div class="status-chip" id="statusChip">Loading cards…</div>
-    <button id="btnLang" class="ghost">Deutsch</button>
+    <div class="topbar-actions">
+      <button id="btnViewSource" class="ghost slim-btn" type="button">View Source</button>
+      <button id="btnLang" class="ghost">Deutsch</button>
+    </div>
   </header>
 
   <main>
@@ -44,14 +46,20 @@
 
     <section class="table hidden" id="screenTable">
       <div class="table-header">
-        <div>
-          <div class="label" id="txtLobbySeed">Lobby seed</div>
-          <div class="seed-display" id="seedDisplay">—</div>
+        <div class="table-meta">
+          <div class="meta-block">
+            <div class="label" id="txtLobbySeed">Lobby seed</div>
+            <div class="seed-display" id="seedDisplay">—</div>
+          </div>
+          <div class="meta-block round-block">
+            <div class="label" id="txtRoundLabel">Round</div>
+            <div class="round-value" id="roundDisplay">—</div>
+          </div>
         </div>
         <div class="table-actions">
           <button id="btnCopyTop" class="ghost">Copy seed</button>
-          <button id="btnStartRound">Start round</button>
           <button id="btnExit" class="ghost">Exit game</button>
+          <button id="btnStartRound">Start round</button>
         </div>
       </div>
 
@@ -60,6 +68,10 @@
           <div class="label" id="txtBlackLabel">BLACK CARD (Question)</div>
           <div class="text" id="blackText">Tap “Start round”.</div>
           <div class="hint" id="txtBlackHint">Tap/click for next round</div>
+          <div class="card-brand">
+            <span class="brand-icon"></span>
+            <span class="brand-name">Cards Against Germanity</span>
+          </div>
         </div>
         <div class="hand">
           <div class="label" id="txtHandLabel">YOUR WHITE CARDS (Answers)</div>
@@ -91,14 +103,42 @@
 
   <!-- Showcase overlay -->
   <div class="showcase hidden" id="showcase">
-    <div class="showcase-card black-show" id="showBlack"></div>
-    <div class="showcase-card white-show" id="showWhite"></div>
-    <button class="ghost close-show" id="btnCloseShow">Close</button>
+    <div class="showcase-card black-show" id="showBlack">
+      <div class="show-text" id="showBlackText"></div>
+      <div class="card-brand">
+        <span class="brand-icon"></span>
+        <span class="brand-name">Cards Against Germanity</span>
+      </div>
+    </div>
+    <div class="showcase-card white-show" id="showWhite">
+      <div class="show-text" id="showWhiteText"></div>
+      <div class="card-brand">
+        <span class="brand-icon"></span>
+        <span class="brand-name">Cards Against Germanity</span>
+      </div>
+    </div>
+    <div class="show-actions">
+      <button class="ghost slim-btn" id="btnNextRound">Next Round</button>
+      <button class="ghost slim-btn" id="btnCancelShow">Cancel</button>
+    </div>
+  </div>
+
+  <!-- End-of-deck overlay -->
+  <div class="end-overlay hidden" id="endOverlay">
+    <div class="end-glow"></div>
+    <div class="end-card">
+      <p class="eyebrow" id="txtEndEyebrow">Nice run!</p>
+      <h2 id="txtEndTitle">You played all black cards.</h2>
+      <p class="sub" id="txtEndSub">Time for a new seed or replay this one from the start.</p>
+      <div class="end-actions">
+        <button id="btnEndReplay">Replay seed</button>
+        <button class="ghost" id="btnEndExit">Back to lobby</button>
+      </div>
+    </div>
   </div>
 
   <footer>
     <span id="txtFooter">Unofficial, inspired by Cards Against Humanity.</span>
-    <a class="ghost slim-btn" style="margin-left:auto;" href="https://github.com/jackzzso/cards-against-germanity" target="_blank" rel="noopener noreferrer">View Source</a>
   </footer>
 
   <script src="script.js"></script>

@@ -25,7 +25,9 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  user-select: none;
 }
+input, textarea, button, select { user-select: text; }
 
 .topbar {
   display: flex;
@@ -36,6 +38,7 @@ body {
   backdrop-filter: blur(6px);
   border-bottom: 1px solid #181820;
 }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
 .brand {
   font-weight: 800;
   text-transform: lowercase;
@@ -43,14 +46,6 @@ body {
   font-size: 1.2rem;
 }
 .brand span { color: #bfbff5; }
-.status-chip {
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid #202030;
-  background: rgba(255,255,255,0.04);
-  color: var(--muted);
-  font-size: 0.9rem;
-}
 
 main {
   flex: 1;
@@ -147,6 +142,14 @@ button.ghost {
   flex-wrap: wrap;
   gap: 10px;
 }
+.table-meta { display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.meta-block { display: flex; flex-direction: column; gap: 4px; }
+.round-block { min-width: 120px; }
+.round-value {
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.6px;
+}
 .label { color: var(--muted); font-size: 0.95rem; letter-spacing: 0.3px; }
 .seed-display {
   font-weight: 800;
@@ -173,8 +176,10 @@ button.ghost {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-bottom: 36px;
   cursor: pointer;
   animation: floaty 6s ease-in-out infinite;
+  position: relative;
 }
 .big-card .text {
   font-size: 1.4rem;
@@ -204,6 +209,7 @@ button.ghost {
   color: #0b0b0b;
   border-radius: 12px;
   padding: 12px;
+  padding-bottom: 38px;
   min-height: 120px;
   box-shadow: 0 10px 24px rgba(0,0,0,0.2);
   display: flex;
@@ -216,6 +222,27 @@ button.ghost {
   opacity: 0;
   animation: deal 0.4s ease forwards;
 }
+.card-brand {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+.card-brand .brand-icon {
+  width: 16px;
+  height: 16px;
+  background: url("icon.ico") center/contain no-repeat;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35));
+}
+.big-card .card-brand { color: #fff; opacity: 0.9; }
+.white-card .card-brand { color: #0b0b0b; opacity: 0.78; }
 .white-card:nth-child(1) { animation-delay: 0.02s; }
 .white-card:nth-child(2) { animation-delay: 0.04s; }
 .white-card:nth-child(3) { animation-delay: 0.06s; }
@@ -293,31 +320,42 @@ button.ghost {
 
 .toast {
   position: fixed;
-  bottom: 18px;
-  right: 18px;
-  background: rgba(0,0,0,0.8);
-  border: 1px solid #202030;
+  bottom: 18px; /* tuck into footer band */
+  right: 22px;
+  transform: translateY(6px);
+  background: rgba(10,10,18,0.92);
+  border: 1px solid #2a2a40;
   color: var(--text);
   padding: 12px 14px;
   border-radius: 12px;
-  box-shadow: var(--shadow);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02);
+  backdrop-filter: blur(6px);
   opacity: 0;
   pointer-events: none;
-  transform: translateY(6px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease;
   z-index: 10;
+  max-width: min(420px, calc(100vw - 44px));
+}
+.toast.warn {
+  background: rgba(255, 132, 0, 0.14);
+  border-color: rgba(255, 184, 108, 0.85);
+  color: #ffd9aa;
 }
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+  filter: drop-shadow(0 6px 24px rgba(0,0,0,0.35));
 }
 
 footer {
   padding: 16px 22px;
   border-top: 1px solid #14141c;
   color: var(--muted);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+footer span { text-align: center; }
 
 /* Animations */
 @keyframes floaty {
@@ -349,6 +387,7 @@ footer {
   .hero { grid-template-columns: 1fr; }
   .cards-row { grid-template-columns: 1fr; }
   .topbar { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .topbar-actions { width: 100%; justify-content: flex-start; }
   .table-header { align-items: flex-start; }
 }
 
@@ -371,11 +410,13 @@ footer {
   min-height: 140px;
   border-radius: 16px;
   padding: 18px;
+  padding-bottom: 48px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   line-height: 1.35;
   font-weight: 800;
   text-align: left;
+  position: relative;
 }
 .black-show {
   background: #0d0d0f;
@@ -387,10 +428,67 @@ footer {
   color: #0b0b0b;
   border: 1px solid #dcdce5;
 }
-.close-show {
-  margin-top: 8px;
-}
+.black-show .card-brand { color: #fff; opacity: 0.9; }
+.white-show .card-brand { color: #0b0b0b; opacity: 0.78; }
+.show-text { word-break: break-word; }
+.show-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.show-actions .ghost { min-width: 120px; }
 .slim-btn {
   padding: 10px 12px;
   font-weight: 700;
+}
+
+/* End-of-deck overlay */
+.end-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: radial-gradient(circle at 20% 30%, rgba(124,93,255,0.14), transparent 40%),
+              radial-gradient(circle at 80% 20%, rgba(102,231,255,0.14), transparent 45%),
+              rgba(0,0,0,0.88);
+  backdrop-filter: blur(4px);
+  z-index: 60;
+}
+.end-overlay.visible { display: flex; }
+.end-overlay .end-glow {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle at 30% 30%, rgba(124,93,255,0.35), transparent 45%),
+              radial-gradient(circle at 70% 60%, rgba(102,231,255,0.35), transparent 50%);
+  filter: blur(70px);
+  opacity: 0.6;
+  animation: swirl 16s ease-in-out infinite;
+}
+.end-card {
+  position: relative;
+  background: #0f0f18;
+  border: 1px solid #2a2a38;
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02);
+  max-width: 520px;
+  width: min(520px, 92vw);
+  text-align: center;
+  animation: popIn 0.35s ease, floaty 9s ease-in-out infinite;
+  z-index: 2;
+}
+.end-card h2 { margin: 8px 0 10px; font-size: 1.8rem; }
+.end-card .sub { color: var(--muted); }
+.end-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.end-overlay.hidden { display: none; }
+
+@keyframes swirl {
+  0% { transform: translate(-4%, -2%) rotate(0deg) scale(1); }
+  50% { transform: translate(4%, 3%) rotate(6deg) scale(1.05); }
+  100% { transform: translate(-4%, -2%) rotate(0deg) scale(1); }
 }
