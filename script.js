@@ -190,6 +190,7 @@ const btnEndExit = document.getElementById("btnEndExit");
 const txtEndEyebrow = document.getElementById("txtEndEyebrow");
 const txtEndTitle = document.getElementById("txtEndTitle");
 const txtEndSub = document.getElementById("txtEndSub");
+const topbarBrand = document.querySelector(".brand");
 
 // Text nodes
 const txtEyebrow = document.getElementById("txtEyebrow");
@@ -226,6 +227,24 @@ let gameStarted = false;
 let blackOrder = [];
 let gameEnded = false;
 let autoAdvancePending = false;
+const BRAND_VARIANTS = {
+  normal: 'cards<span>against</span>germanity',
+  joke: 'germans<span>against</span>humanity'
+};
+let brandJokeActive = false;
+const BRAND_ANIM_CLASS = "brand-wobble";
+function triggerBrandAnimation() {
+  if (!topbarBrand) return;
+  topbarBrand.classList.remove(BRAND_ANIM_CLASS);
+  // Force reflow so the animation can be replayed immediately.
+  void topbarBrand.offsetWidth;
+  topbarBrand.classList.add(BRAND_ANIM_CLASS);
+  setTimeout(() => topbarBrand?.classList.remove(BRAND_ANIM_CLASS), 900);
+}
+function refreshBrandName() {
+  if (!topbarBrand) return;
+  topbarBrand.innerHTML = brandJokeActive ? BRAND_VARIANTS.joke : BRAND_VARIANTS.normal;
+}
 
 // --- Fallback card data (German) ---
 const FALLBACK = { blackCards: [], whiteCards: [] };
@@ -778,6 +797,20 @@ btnEndReplay.onclick = () => replaySeed();
 btnEndExit.onclick = () => exitGame();
 btnViewSource.onclick = () => window.open("https://github.com/jackzzso/cards-against-germanity", "_blank", "noopener,noreferrer");
 
+if (topbarBrand) {
+  topbarBrand.addEventListener("click", () => {
+    brandJokeActive = !brandJokeActive;
+    refreshBrandName();
+    triggerBrandAnimation();
+    showToast(
+      brandJokeActive
+        ? "That name wasn't a great idea."
+        : "Much better."
+    );
+  });
+}
+
+refreshBrandName();
 // --- Init ---
 applyLocaleTexts();
 loadCards().then(() => {

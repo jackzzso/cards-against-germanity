@@ -46,6 +46,9 @@ input, textarea, button, select { user-select: text; }
   font-size: 1.2rem;
 }
 .brand span { color: #bfbff5; }
+.brand-wobble {
+  animation: brandAlarm 0.9s ease;
+}
 
 main {
   flex: 1;
@@ -381,6 +384,16 @@ footer span { text-align: center; }
 @keyframes deal {
   0% { opacity: 0; transform: translateY(8px) rotate(-1deg) scale(0.98); }
   100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+}
+
+@keyframes brandAlarm {
+  0% { transform: translateY(0) scale(1); }
+  15% { transform: translateX(-4px) rotate(-1deg); }
+  30% { transform: translateX(4px) rotate(2deg); }
+  45% { transform: translateX(-3px) rotate(-1deg); }
+  60% { transform: translateX(3px) rotate(1deg); }
+  85% { transform: translateX(0) rotate(0); }
+  100% { transform: translateY(0) scale(1); }
 }
 
 /* Mobile tweaks */
