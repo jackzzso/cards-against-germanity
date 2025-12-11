@@ -8,21 +8,21 @@ const STRINGS = {
     heroTitle: "Start a lobby\nshare the seed\nplay together IRL.",
     heroSub: "Black cards sync via seed, white cards are random per device. Local only, no servers.",
     seedPlaceholder: "Enter or create lobby seed",
-    create: "Create lobby",
-    join: "Join lobby",
+    create: "Create Lobby",
+    join: "Join Lobby",
     finePrint: "Tip: use the same seed on all devices.",
     previewBlack: "“Question cards” sync by seed.",
     previewWhite: "Answer cards are random per device.",
-    goToTable: "Go to table",
-    copySeed: "Copy seed",
+    goToTable: "Go To Table",
+    copySeed: "Copy Seed",
     lobbySeed: "Lobby seed",
-    startRound: "Start round",
-    exitGame: "Exit game",
+    startRound: "Start Round",
+    exitGame: "Exit Game",
     blackLabel: "BLACK CARD (Question)",
     blackTap: "Tap “Start round”.",
     blackHint: "Tap/click for next round",
     handLabel: "YOUR WHITE CARDS (Answers)",
-    playLabel: "Selected card",
+    playLabel: "Selected Card",
     placeholder: "Click a white card",
     flowHeading: "Flow",
     step1: "Share the seed. Everyone enters the same seed.",
@@ -286,7 +286,7 @@ function applyLocaleTexts() {
   btnCopyTop.textContent = t("copySeed");
   btnStartRound.textContent = t("startRound");
   btnExit.textContent = t("exitGame");
-  btnShowcase.textContent = lang === "en" ? "Show to players" : "Allen zeigen";
+  btnShowcase.textContent = lang === "en" ? "Show To Players" : "Allen zeigen";
   txtLobbySeed.textContent = t("lobbySeed");
   txtBlackLabel.textContent = t("blackLabel");
   blackTextEl.textContent = currentSeed ? blackTextEl.textContent : t("blackTap");

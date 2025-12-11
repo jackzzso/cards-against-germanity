@@ -87,6 +87,7 @@ button {
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.2s ease, opacity 0.15s ease;
   box-shadow: 0 12px 26px rgba(124,93,255,0.25);
+  user-select: none;
 }
 button:hover { transform: translateY(-1px); }
 button:active { transform: translateY(1px); opacity: 0.9; }
