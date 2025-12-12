@@ -534,7 +534,7 @@ function renderBlackCard() {
     blackTextEl.textContent = t("blackTap");
     return;
   }
-  if (currentBlackIndex >= blackOrder.length) {
+  if (currentBlackIndex >= (5) ) {
     endGame();
     return;
   }
@@ -634,7 +634,7 @@ function nextRound() {
     return;
   }
   currentBlackIndex += 1;
-  if (currentBlackIndex >= blackOrder.length) {
+  if (currentBlackIndex >= (5)) {
     endGame();
     return;
   }
