@@ -15,11 +15,11 @@ const STRINGS = {
     previewWhite: "Answer cards are random per device.",
     goToTable: "Go To Table",
     copySeed: "Copy Seed",
-    lobbySeed: "Lobby seed",
+    lobbySeed: "Lobby Seed",
     startRound: "Start Round",
     exitGame: "Exit Game",
     blackLabel: "BLACK CARD (Question)",
-    blackTap: "Tap “Start round”.",
+    blackTap: "Tap “Start Round”.",
     blackHint: "Tap/click for next round",
     handLabel: "YOUR WHITE CARDS (Answers)",
     playLabel: "Selected Card",
@@ -246,6 +246,7 @@ function refreshBrandName() {
   topbarBrand.innerHTML = brandJokeActive ? BRAND_VARIANTS.joke : BRAND_VARIANTS.normal;
 }
 
+let blackPlaceholderActive = true;
 // --- Fallback card data (German) ---
 const FALLBACK = { blackCards: [], whiteCards: [] };
 FALLBACK.blackCards = [
@@ -437,7 +438,9 @@ function applyLocaleTexts() {
   btnShowcase.textContent = lang === "en" ? "Show To Players" : "Allen zeigen";
   txtLobbySeed.textContent = t("lobbySeed");
   txtBlackLabel.textContent = t("blackLabel");
-  blackTextEl.textContent = currentSeed ? blackTextEl.textContent : t("blackTap");
+  if (blackPlaceholderActive) {
+    blackTextEl.textContent = t("blackTap");
+  }
   txtBlackHint.textContent = t("blackHint");
   txtHandLabel.textContent = t("handLabel");
   txtPlayLabel.textContent = t("playLabel");
@@ -527,11 +530,13 @@ function closeShowcase({ advance = false } = {}) {
 function renderBlackCard() {
   if (!currentSeed) {
     blackTextEl.textContent = t("blackTap");
+    blackPlaceholderActive = true;
     return;
   }
   if (!blackOrder.length) buildBlackOrder();
   if (!blackOrder.length) {
     blackTextEl.textContent = t("blackTap");
+    blackPlaceholderActive = true;
     return;
   }
   if (currentBlackIndex >= (5) ) {
@@ -539,6 +544,7 @@ function renderBlackCard() {
     return;
   }
   blackTextEl.textContent = blackOrder[currentBlackIndex];
+  blackPlaceholderActive = false;
 }
 
 function renderWhiteHand() {
@@ -659,6 +665,7 @@ function exitGame() {
   seedDisplay.textContent = "—";
   currentSeedLabel.textContent = lang === "en" ? "Seed: —" : "Seed: —";
   blackTextEl.textContent = t("blackTap");
+  blackPlaceholderActive = true;
   whiteHandEl.innerHTML = "";
   updateSelectedSlot();
   updateRoundDisplay();
@@ -690,6 +697,7 @@ function endGame() {
   hideStartButton();
   showEndOverlay();
   blackTextEl.textContent = lang === "en" ? "No black cards left." : "Keine schwarzen Karten mehr.";
+  blackPlaceholderActive = false;
   updateRoundDisplay();
 }
 
